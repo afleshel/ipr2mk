@@ -41,37 +41,46 @@ class Parser:
     def parse_order_entry(self, e):
         type = e.get('type')
         if type == "library":
-            return ipr.LibraryDependency(library=self.libraries[e.get("name")], is_test=e.xpath("@scope='TEST'"))
+            return ipr.LibraryDependency(library=e.get("name"), scope=e.get("scope"))
         elif type == "jdk":
             #TODO - JDKs are defined in ~/.IdeaIC12/config/options/jdk.table.xml
             return ipr.JDKDependency(name=e.get("jdkName"))
+        elif type == "inheritedJdk":
+            #TODO - resolve this correctly
+            return ipr.JDKDependency(name="inherited")
+        elif type == "module":
+            return ipr.ModuleDependency(module=e.get("module-name"), scope=e.get("scope"))
+        elif type == "module-library":
+            return ipr.LibraryDependency(library=e.get("name"), scope=e.get("scope"))
         else:
             raise ValueError("unknown " + e.tag + " type " + type)
 
     
     def parse_order(self, module_xml):
-        return [self.parse_order_entry(e) 
-                for e 
-                in module_xml.xpath("/module/component/orderEntry[@type!='sourceFolder']")]
+        return (self.parse_order_entry(e) 
+                for e in module_xml.xpath("/module/component/orderEntry[@type!='sourceFolder']"))
     
     
     def parse_module(self, module_file):
         module_dir = os.path.dirname(module_file)
         module_xml = parse_ipr_xml(module_file)
-        
-        return ipr.Module(
-            name=module_name_from_file(module_file),
-            production_source=parse_source_dirs(module_dir, module_xml, is_test=False),
-            test_source=parse_source_dirs(module_dir, module_xml, is_test=True),
-            order=self.parse_order(module_xml))
+
+        if module_xml.getroot().get("type") == "JAVA_MODULE":
+            return ipr.Module(
+                name=module_name_from_file(module_file),
+                production_source=parse_source_dirs(module_dir, module_xml, is_test=False),
+                test_source=parse_source_dirs(module_dir, module_xml, is_test=True),
+                order=self.parse_order(module_xml))
+        else:
+            return None
     
     
     def parse_modules(self, modules_file):
         modules_xml = parse_ipr_xml(modules_file)
     
-        return [self.parse_module(m.replace("$PROJECT_DIR$", self.dir.rstrip("/")))
-                for m 
-                in modules_xml.xpath("/project/component/modules/module/@filepath")]
+        return filter(None, [self.parse_module(m.replace("$PROJECT_DIR$", self.dir.rstrip("/")))
+                             for m 
+                             in modules_xml.xpath("/project/component/modules/module/@filepath")])
     
     def parse_library(self, f):
         library_xml = parse_ipr_xml(f);
