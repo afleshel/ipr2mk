@@ -24,6 +24,10 @@ class _Record(object):
     
     __str__ = __repr__
 
+    def isa(self, t):
+        "syntactic sugar for isinstance"
+        return isinstance(self, t)
+
 
 def Record(*fields):
     class Record(_Record):
