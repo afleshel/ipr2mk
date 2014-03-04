@@ -15,8 +15,13 @@ of effort to get the dependencies right for a fast, parallelisable build.  It's 
 in Make.
 
 Java programmers work in an IDE.  Professional Java programmers work in IntelliJ.  Maintaining multiple build files 
-is a waste of time.  So use the IDE configuration as the master copy and generate the Make rules from that for use 
-in automated builds.
+is a waste of time.  So use the IDE configuration as the master copy and generate Make rules from the IDE configuration.
 
-Make treats included makefiles as dependencies and so can automatically keep the generated makefiles up to date 
-as the IntelliJ files are changed.
+How?
+----
+
+Write a makerule in the project makefile to compile the project's IntelliJ project files to a dependency file Make format.
+
+Include the dependency file in the project makefile.
+
+Make will automatically regenerate the dependency file when developers change the project configuration in the IDE.
