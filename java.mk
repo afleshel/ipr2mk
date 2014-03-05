@@ -3,7 +3,7 @@
 JAR ?= jar
 JAVAC ?= javac
 
-java_classpath_of=$(subst $(eval) ,:,$(wildcard $1))
+java_classpath_of=$(subst $(eval) ,:,$1)
 
 %.jar:
 	@mkdir -p $(basename $@)/
