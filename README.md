@@ -23,5 +23,6 @@ Include the dependency file in the project makefile.
 
 Make will automatically regenerate the dependency file when developers change the project configuration in the IDE.
 
+----
 
 \* [Gradle](http://gradle.org) is an exception.
