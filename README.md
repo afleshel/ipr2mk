@@ -1,10 +1,10 @@
-ipr2mk - Compile IntelliJ project files to Makefile rules
-=========================================================
+ipr2mk - Translate IntelliJ project files to Makefile rules
+===========================================================
 
 What?
 -----
 
-A compiler that compiles IntelliJ project files to Makefile rules.
+A tool that translates IntelliJ project files to Makefile rules.
 
 Why?
 ----
