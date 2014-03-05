@@ -18,7 +18,6 @@ args = parser.parse_args()
 use_stdout = args.output == "-"
 
 project = parse(args)
-print project
 output = sys.stdout if use_stdout else open(args.output, "w")
 try:
     to_makefile(project, args.outdir, output)
