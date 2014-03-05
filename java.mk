@@ -7,5 +7,5 @@ java_classpath_of=$(subst $(eval) ,:,$1)
 
 %.jar:
 	@mkdir -p $(basename $@)/
-	$(JAVAC) -cp $(call java_classpath_of,$(filter %.jar,$^)) -d $(basename $@)/ $(filter %.java,$^)
+	$(JAVAC) $(JAVACFLAGS) -cp $(call java_classpath_of,$(filter %.jar,$^)) -d $(basename $@)/ $(filter %.java,$^)
 	$(JAR) -cf$(JARFLAGS) $@ -C $(basename $@)/ .
