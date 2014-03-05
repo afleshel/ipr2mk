@@ -21,7 +21,6 @@ def source_dependencies(project, module, outdir):
 def jar_dependencies(project, module, outdir):
     for d in module.dependencies:
         if d.isa(ipr.LibraryDependency):
-            print "module: " + str(module.name) + ", library: " + str(d.library)
             for jar in project.library(d.library).classpath:
                 yield jar
 
