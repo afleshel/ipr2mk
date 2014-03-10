@@ -10,5 +10,5 @@ java_classpath_of=$(subst $(eval) ,:,$1)
 
 %.compiled:
 	@mkdir -p $*/
-	$(JAVAC) $(JAVACFLAGS) -cp $(call java_classpath_of,$(filter %.jar,$^)) -d $*/ $(filter %.java,$^)
+	$(JAVAC) $(JAVACFLAGS) $(patsubst %,-classpath %,$(call java_classpath_of,$(filter %.jar,$^))) -d $*/ $(filter %.java,$^)
 	touch $@
