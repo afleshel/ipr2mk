@@ -12,20 +12,19 @@ class VarDef(Record("name", "value", "lazy")):
     pass
 
 
-def module_file(module, outdir, ext):
+def module_output(module, outdir, ext):
     return os.path.join(outdir, module.name + "." + ext)
 
 def source_dependencies(project, module, outdir):
     return ["$(shell find \"" + d + "\" -name '*.java')" for d in module.production_source]
 
 def jar_dependencies(project, module, outdir):
-    for d in module.dependencies:
+    for d in module.dependencies_for(ipr.production_compile):
         if d.isa(ipr.LibraryDependency):
             for jar in project.library(d.library).classpath:
                 yield jar
-
         elif d.isa(ipr.ModuleDependency):
-            yield module_file(project.module(d.module), outdir, "jar")
+            yield module_output(project.module(d.module), outdir, "jar")
 
 
 def dependencies_of(project, module, outdir):
@@ -34,7 +33,7 @@ def dependencies_of(project, module, outdir):
 
 
 def module_rules(project, module, outdir):
-    return Rule(target=module_file(module, outdir, "compiled"),
+    return Rule(target=module_output(module, outdir, "compiled"),
                 dependencies=dependencies_of(project, module, outdir))
 
 def to_rules(project, outdir):

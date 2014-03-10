@@ -5,6 +5,13 @@ import os
 from glob import glob
 
 
+SCOPE_TEST = 'TEST'
+SCOPE_PROVIDED = 'PROVIDED'
+SCOPE_COMPILE = 'COMPILE'
+SCOPE_JDK = "JDK"
+
+SupportedVersion = "4"
+
 class Project(Record('name', 'dir', 'libraries', 'modules')):
     def library(self, library_name):
         if library_name in self.libraries:
@@ -21,26 +28,29 @@ class Library(Record('name', 'classpath')):
 
 
 class Module(Record('name', 'production_source', 'test_source', 'dependencies')):
-    pass
+    def dependencies_for(self, selector):
+        return [d for d in self.dependencies if selector(d)]
+
+
+def production_compile(d):
+    return d.scope == SCOPE_COMPILE or d.scope == SCOPE_PROVIDED
+
+def test_compile(d):
+    return production_compile(d) or d.scope == SCOPE_TEST
 
 
 class LibraryDependency(Record('library', 'scope')):
     pass
 
-
 class ModuleDependency(Record('module', 'scope')):
     pass
 
+class ModuleLibrary(Record('classpath', 'scope')):
+    pass
 
 class JDKDependency(Record('name')):
-    pass
+    scope = SCOPE_JDK
 
-
-class ModuleLibrary(Record('classpath')):
-    pass
-
-
-SupportedVersion = "4"
 
 _jar_url_pattern = re.compile("^jar://(?P<path>.+)!/")
 _file_url_pattern = re.compile("^file://(?P<path>.+)")
@@ -73,7 +83,8 @@ def parse_source_dirs(module_dir, module_xml, is_test):
         flag='true' if is_test else 'false')]
 
 def parse_dependency_scope(e):
-    return e.get("scope", "COMPILE")
+    return e.get("scope", SCOPE_COMPILE)
+
 
 class Parser:
     def __init__(self, dir):
@@ -101,7 +112,7 @@ class Parser:
         elif type == "module":
             return ModuleDependency(module=e.get("module-name"), scope=parse_dependency_scope(e))
         elif type == "module-library":
-            return ModuleLibrary(classpath=[url_to_file(url) for url in e.xpath("library/CLASSES/root/@url")])
+            return ModuleLibrary(classpath=[url_to_file(url) for url in e.xpath("library/CLASSES/root/@url")], scope=parse_dependency_scope(e))
         else:
             raise ValueError("unknown " + e.tag + " type " + type)
 
